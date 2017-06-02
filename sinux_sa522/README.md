@@ -1,3 +1,0 @@
-# SINUX
-
-Hardware Library
