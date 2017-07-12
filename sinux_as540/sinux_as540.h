@@ -8,17 +8,19 @@ class sinux_as540{
 		//functions
 		sinux_as540();
 		void INIT(int net_address);
+		void CONFIG_UI(int _ui, int _type);
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
 		void BO_SET_TIME(int pin, int time);
 		void MAIN();
-		boolean BI_STATE(int _ui);
 		boolean BI_PRESSED(int _ui);
-		int AI_STATE(int _ui);
+		boolean BI_STATE(int _ui);
+		float UI_READ(int _ui, int _type);
 	private:
 		//functons
-		void decode_packet();
+		
+		void _decode_packet();
 		//variables
 		char character;
 		String content = "";
@@ -38,7 +40,9 @@ class sinux_as540{
 		int _ui3 = A2;
 		int _ui4 = A3;
 		int _ui5 = A4;
+		int _ui_type[6] = {0,3,3,3,3,3};
 		unsigned long _time_to_tick = 0;
+		unsigned long _time_to_send_UI = 0;
 		int _bo1_countdown = 0;
 		int _bo2_countdown = 0;
 		int _bo3_countdown = 0;

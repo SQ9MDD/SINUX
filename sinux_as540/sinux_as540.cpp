@@ -54,7 +54,25 @@ void sinux_as540::INIT(int net_address){
 	}
 }
 
-void sinux_as540::decode_packet(){
+void sinux_as540::CONFIG_UI(int _ui, int _type){
+	int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- ned to be fixed
+	digitalWrite(_PTT,HIGH);
+	delay(50);
+	Serial.print(String(_net_address) + ";"+_ui+";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
+	delay(15);
+	Serial.print(String(_net_address) + ";"+_ui+";1;1;"+_type_data[_type]+";0\n");
+	delay(15);
+	digitalWrite(_PTT,LOW);	
+	switch(_ui){
+		case 1: _ui_type[1] = _type; break;
+		case 2: _ui_type[2] = _type; break;
+		case 3: _ui_type[3] = _type; break;
+		case 4: _ui_type[4] = _type; break;
+		case 5: _ui_type[5] = _type; break;
+	}
+}
+
+void sinux_as540::_decode_packet(){
   //olewamy dekodowanie jesli dane nie sa dla mnie
 	if(content.substring(0,2).toInt() != _net_address){
 		return;
@@ -117,7 +135,7 @@ void sinux_as540::MAIN(){
 		if(str_ready == true){
 			content.trim();//clearing CR i LF
 			delay(50);
-			decode_packet();
+			_decode_packet();
 			content = "";
 			str_ready = false;
 		}	 
@@ -125,7 +143,7 @@ void sinux_as540::MAIN(){
 	
 	if(millis() >= _time_to_tick){
 		digitalWrite(_HB,HIGH);
-		delay(5);
+		delay(3);
 		digitalWrite(_HB,LOW);
 		
 		//reseting bo
@@ -234,27 +252,71 @@ void sinux_as540::MAIN(){
 		}	
 		_time_to_tick = millis() + 100;
 	}
+
+	if(millis() >= _time_to_send_UI){
+		int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- ned to be fixed
+		for(int a=1; a <= 5; a++){
+			if(_ui_type[a] != 3){
+				int _type = _ui_type[a];
+				digitalWrite(_PTT,HIGH);
+				float pomiar = UI_READ(a,_ui_type[a]);
+				delay(15);
+				Serial.print(String(_net_address) + ";"+a+";1;1;"+_type_data[_type]+";"+pomiar+"\n");
+				delay(15);
+				digitalWrite(_PTT,LOW);
+			}			
+		}
+	_time_to_send_UI = millis() + 240000;
+	}
+	
 }
 
-int sinux_as540::AI_STATE(int _ui){
+float sinux_as540::UI_READ(int _ui, int _type){
+	float _pomiar_ui = 0;
 	switch(_ui){
 		case 1:
-			return(analogRead(_ui1));
+			if(_type == 6){	
+				_pomiar_ui = ((1023 - float(analogRead(_ui1)))-238)/10; 
+			}else{
+				_pomiar_ui = 1023 - analogRead(_ui1);
+			}
+			return(_pomiar_ui);
 		break;
 		case 2:
-			return(analogRead(_ui2));
+			if(_type == 6){	
+				_pomiar_ui = ((1023 - float(analogRead(_ui2)))-238)/10; 
+			}else{
+				_pomiar_ui = 1023 - analogRead(_ui2);
+			}
+			return(_pomiar_ui);
 		break;
 		case 3:
-			return(analogRead(_ui3));
+			if(_type == 6){	
+				_pomiar_ui = ((1023 - float(analogRead(_ui3)))-238)/10; 
+			}else{
+				_pomiar_ui = 1023 - analogRead(_ui3);
+			}
+			return(_pomiar_ui);
 		break;
 		case 4:
-			return(analogRead(_ui4));
+			if(_type == 6){	
+				_pomiar_ui = ((1023 - float(analogRead(_ui4)))-238)/10; 
+			}else{
+				_pomiar_ui = 1023 - analogRead(_ui4);
+			}
+			return(_pomiar_ui);
 		break;
 		case 5:
-			return(analogRead(_ui5));
+			if(_type == 6){	
+				_pomiar_ui = ((1023 - float(analogRead(_ui5)))-238)/10; 
+			}else{
+				_pomiar_ui = 1023 - analogRead(_ui5);
+			}
+			return(_pomiar_ui);
 		break;		
 	}
 }
+
 // ************* //
 // GOTOWE poniżej
 // ************* //
