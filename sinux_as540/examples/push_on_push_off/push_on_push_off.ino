@@ -9,7 +9,7 @@
 sinux_as540 sterownik;
 
 void setup() {
-  sterownik.INIT(73);                                               // inicjalizacja i ustawianie adresu sieciowego
+  sterownik.INIT(75);                                               // inicjalizacja i ustawianie adresu sieciowego
 }
 
 void loop() {
