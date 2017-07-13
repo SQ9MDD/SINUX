@@ -9,6 +9,7 @@ class sinux_as540{
 		sinux_as540();
 		void INIT(int net_address);
 		void CONFIG_UI(int _ui, int _type);
+		void CONFIG_AV(int _av);
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
@@ -16,10 +17,10 @@ class sinux_as540{
 		void MAIN();
 		boolean BI_PRESSED(int _ui);
 		boolean BI_STATE(int _ui);
+		int AV_READ(int _av);
 		float UI_READ(int _ui, int _type);
 	private:
 		//functons
-		
 		void _decode_packet();
 		//variables
 		char character;

@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include <EEPROM.h>
 #include "sinux_as540.h"
 
 sinux_as540::sinux_as540(){
@@ -32,7 +33,7 @@ void sinux_as540::INIT(int net_address){
 		delay(50);
 		Serial.print(String(net_address) + ";0;3;0;11;AS-540\n");	//nazwa softu
 		delay(15);		
-		Serial.print(String(net_address) + ";0;3;0;12;v.1.0\n");	//wersja softu
+		Serial.print(String(net_address) + ";0;3;0;12;v.1.1\n");	//wersja softu
 		delay(15);	
 		Serial.print(String(net_address) + ";1;0;0;3;" + String(net_address) + ".BO1\n"); 
 		delay(15);
@@ -55,12 +56,13 @@ void sinux_as540::INIT(int net_address){
 }
 
 void sinux_as540::CONFIG_UI(int _ui, int _type){
-	int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- ned to be fixed
+	int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- need to be fixed
 	digitalWrite(_PTT,HIGH);
 	delay(50);
-	Serial.print(String(_net_address) + ";"+_ui+";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
+	int b = _ui + 4;
+	Serial.print(String(_net_address) + ";"+ b +";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
 	delay(15);
-	Serial.print(String(_net_address) + ";"+_ui+";1;1;"+_type_data[_type]+";0\n");
+	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_type_data[_type]+";0\n");
 	delay(15);
 	digitalWrite(_PTT,LOW);	
 	switch(_ui){
@@ -70,6 +72,19 @@ void sinux_as540::CONFIG_UI(int _ui, int _type){
 		case 4: _ui_type[4] = _type; break;
 		case 5: _ui_type[5] = _type; break;
 	}
+}
+
+void sinux_as540::CONFIG_AV(int _av){
+	digitalWrite(_PTT,HIGH);
+	delay(50);
+	int b = _av + 10;
+	Serial.print(String(_net_address) + ";"+ b +";0;0;29;" + String(_net_address) + ".AV"+ _av +"\n");
+	delay(15);
+	int _sufix = _av + 100;
+	int _av_value = (EEPROM.read(_av)*10) + (EEPROM.read(_sufix));
+	Serial.print(String(_net_address) + ";"+ b +";1;1;45;"+ _av_value +"\n");
+	delay(15);
+	digitalWrite(_PTT,LOW);		
 }
 
 void sinux_as540::_decode_packet(){
@@ -112,7 +127,22 @@ void sinux_as540::_decode_packet(){
 				break;          
 				} 
 			}
-		}		
+		}
+		//tutaj dekodowanie AV
+		int sens_addr = content.substring(3,5).toInt();
+		if(content.substring(0,2).toInt() == _net_address && sens_addr >= 10){
+			int ack_option = content.substring(8,9).toInt();
+			int obw_1_dimm_lvl = 0;
+			obw_1_dimm_lvl = content.substring(13,16).toInt();		
+			EEPROM.write((sens_addr-10),(obw_1_dimm_lvl/10));
+			EEPROM.write(((sens_addr-10) + 100),(obw_1_dimm_lvl%10));
+			//Serial.println(obw_1_dimm_lvl);
+			digitalWrite(_PTT,HIGH);
+			delay(50);
+			Serial.print(String(_net_address) + ";" + String(sens_addr) + ";1;0;45;"+ String(obw_1_dimm_lvl) +"\n");    
+			delay(15);
+			digitalWrite(_PTT,LOW);	
+		}
 	}
 }
 
@@ -256,19 +286,19 @@ void sinux_as540::MAIN(){
 	if(millis() >= _time_to_send_UI){
 		int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- ned to be fixed
 		for(int a=1; a <= 5; a++){
-			if(_ui_type[a] != 3){
+			if(_ui_type[a] != 3){										// send only analog inputs
 				int _type = _ui_type[a];
 				digitalWrite(_PTT,HIGH);
 				float pomiar = UI_READ(a,_ui_type[a]);
 				delay(15);
-				Serial.print(String(_net_address) + ";"+a+";1;1;"+_type_data[_type]+";"+pomiar+"\n");
+				int b = a + 4;
+				Serial.print(String(_net_address) + ";"+ b +";1;1;"+_type_data[_type]+";"+pomiar+"\n");
 				delay(15);
 				digitalWrite(_PTT,LOW);
 			}			
 		}
 	_time_to_send_UI = millis() + 240000;
 	}
-	
 }
 
 float sinux_as540::UI_READ(int _ui, int _type){
@@ -317,9 +347,16 @@ float sinux_as540::UI_READ(int _ui, int _type){
 	}
 }
 
+int sinux_as540::AV_READ(int _av){
+	int _sufix = _av + 100;
+	int _av_value = (EEPROM.read(_av)*10) + (EEPROM.read(_sufix));	
+	return(_av_value);
+}
+
 // ************* //
 // GOTOWE poniżej
 // ************* //
+
 boolean sinux_as540::BI_PRESSED(int _ui){
 	switch(_ui){
 		case 1:
