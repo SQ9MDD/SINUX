@@ -7,14 +7,14 @@ class sinux_as540{
 	public: 
 		//functions
 		sinux_as540();
-		void INIT(int net_address);
+		void MAIN();
+		void INIT(int net_address);		
 		void CONFIG_UI(int _ui, int _type);
 		void CONFIG_AV(int _av);
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
 		void BO_SET_TIME(int pin, int time);
-		void MAIN();
 		boolean BI_PRESSED(int _ui);
 		boolean BI_STATE(int _ui);
 		int AV_READ(int _av);
@@ -67,7 +67,6 @@ class sinux_as540{
 		boolean _bi4_prev_state = false;
 		boolean _bi5_prev_state = false;
 		boolean _HB_state = false;
-	
 };
 
 #endif

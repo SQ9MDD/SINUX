@@ -133,10 +133,9 @@ void sinux_as540::_decode_packet(){
 		if(content.substring(0,2).toInt() == _net_address && sens_addr >= 10){
 			int ack_option = content.substring(8,9).toInt();
 			int obw_1_dimm_lvl = 0;
-			obw_1_dimm_lvl = content.substring(13,16).toInt();		
+			obw_1_dimm_lvl = content.substring(13).toInt();		
 			EEPROM.write((sens_addr-10),(obw_1_dimm_lvl/10));
 			EEPROM.write(((sens_addr-10) + 100),(obw_1_dimm_lvl%10));
-			//Serial.println(obw_1_dimm_lvl);
 			digitalWrite(_PTT,HIGH);
 			delay(50);
 			Serial.print(String(_net_address) + ";" + String(sens_addr) + ";1;0;45;"+ String(obw_1_dimm_lvl) +"\n");    
