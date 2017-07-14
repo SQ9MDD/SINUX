@@ -33,7 +33,7 @@ void sinux_as540::INIT(int net_address){
 		delay(50);
 		Serial.print(String(net_address) + ";0;3;0;11;AS-540\n");	//nazwa softu
 		delay(15);		
-		Serial.print(String(net_address) + ";0;3;0;12;v.1.1\n");	//wersja softu
+		Serial.print(String(net_address) + ";0;3;0;12;v."+_lib_version+"\n");	//wersja softu
 		delay(15);	
 		Serial.print(String(net_address) + ";1;0;0;3;" + String(net_address) + ".BO1\n"); 
 		delay(15);
@@ -56,7 +56,6 @@ void sinux_as540::INIT(int net_address){
 }
 
 void sinux_as540::CONFIG_UI(int _ui, int _type){
-	int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- need to be fixed
 	digitalWrite(_PTT,HIGH);
 	delay(50);
 	int b = _ui + 4;
@@ -65,7 +64,8 @@ void sinux_as540::CONFIG_UI(int _ui, int _type){
 	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_type_data[_type]+";0\n");
 	delay(15);
 	digitalWrite(_PTT,LOW);	
-	switch(_ui){
+	//jesli zmieniam typ UI na inne niz domyslne
+	switch(_ui){												
 		case 1: _ui_type[1] = _type; break;
 		case 2: _ui_type[2] = _type; break;
 		case 3: _ui_type[3] = _type; break;
@@ -283,7 +283,6 @@ void sinux_as540::MAIN(){
 	}
 
 	if(millis() >= _time_to_send_UI){
-		int _type_data[] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- ned to be fixed
 		for(int a=1; a <= 5; a++){
 			if(_ui_type[a] != 3){										// send only analog inputs
 				int _type = _ui_type[a];

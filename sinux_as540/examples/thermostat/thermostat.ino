@@ -23,7 +23,7 @@ void loop() {
     on_off_flag = true;
   }
   
-  if(sterownik.UI_READ(1,6) <= sterownik.AV_READ(2)){            // point OFF
+  if(sterownik.UI_READ(1,6) <= sterownik.AV_READ(2)){            // point OFF 
     on_off_flag = false;
   }
 
@@ -32,7 +32,7 @@ void loop() {
     if(on_off_flag == true){
       sterownik.BO_SET(1);  
     }else{
-      sterownik.BO_RESET(1);
+      sterownik.BO_RESET(1); 
     }
   }
   

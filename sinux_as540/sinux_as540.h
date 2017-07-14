@@ -25,23 +25,25 @@ class sinux_as540{
 		//variables
 		char character;
 		String content = "";
-		int _bo1 = 8;
-		int _bo2 = 7;
-		int _bo3 = 5;
-		int _bo4 = 3;
-		int _bo1A = 9;
-		int _bo2A = 10;
-		int _bo3A = 11;
-		int _bo4A = 12;
-		int _HB = 13;
-		int _PTT = 2;
+		#define _lib_version 1.2
+		#define _bo1  8
+		#define _bo2  7
+		#define _bo3  5
+		#define _bo4  3
+		#define _bo1A  9
+		#define _bo2A  10
+		#define _bo3A  11
+		#define _bo4A  12
+		#define _HB  13
+		#define _PTT  2
+		#define _ui1  A0
+		#define _ui2  A1
+		#define _ui3  A2
+		#define _ui4  A3
+		#define _ui5  A4
+		const int _type_data[17] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- need to be fixed
+		int _ui_type[6] = {0,3,3,3,3,3};	//dynamic this are default value for UI1-5
 		int _net_address = 0;
-		int _ui1 = A0;
-		int _ui2 = A1;
-		int _ui3 = A2;
-		int _ui4 = A3;
-		int _ui5 = A4;
-		int _ui_type[6] = {0,3,3,3,3,3};
 		unsigned long _time_to_tick = 0;
 		unsigned long _time_to_send_UI = 0;
 		int _bo1_countdown = 0;
