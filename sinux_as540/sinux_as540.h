@@ -1,6 +1,7 @@
 #ifndef sinux_as540_h
 #define sinux_as540_h
 
+#include "mysensors.h"
 #include "Arduino.h"
 
 class sinux_as540{
@@ -9,8 +10,8 @@ class sinux_as540{
 		sinux_as540();
 		void MAIN();
 		void INIT(int net_address);		
-		void CONFIG_UI(int _ui, int _type);
-		void CONFIG_AV(int _av);
+		void CONFIG_UI(int _ui, int _type, int _unit);	//range: 1-5,  child sensors id: 5-9
+		void CONFIG_AV(int _av);						//range: 1-90, child sensors id: 10-100
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
@@ -18,7 +19,8 @@ class sinux_as540{
 		boolean BI_PRESSED(int _ui);
 		boolean BI_STATE(int _ui);
 		int AV_READ(int _av);
-		float UI_READ(int _ui, int _type);
+		float UI_READ(int _ui);
+		//#include "mysensors.h"
 	private:
 		//functons
 		void _decode_packet();
@@ -40,9 +42,8 @@ class sinux_as540{
 		#define _ui2  A1
 		#define _ui3  A2
 		#define _ui4  A3
-		#define _ui5  A4
-		const int _type_data[17] = {16,16,16,2,3,3,0,1,4,0,0,0,0,0,0,0,37};		//<- need to be fixed
-		int _ui_type[6] = {0,3,3,3,3,3};	//dynamic this are default value for UI1-5
+		#define _ui5  A4	
+		int _ui_unit[6] = {0,2,2,2,2,2};	//dynamic this are default value for UI1-5
 		int _net_address = 0;
 		unsigned long _time_to_tick = 0;
 		unsigned long _time_to_send_UI = 0;
@@ -68,7 +69,7 @@ class sinux_as540{
 		boolean _bi3_prev_state = false;
 		boolean _bi4_prev_state = false;
 		boolean _bi5_prev_state = false;
-		boolean _HB_state = false;
+		boolean _HB_state = false; 
 };
 
 #endif

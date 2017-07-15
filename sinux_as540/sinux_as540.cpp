@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include <EEPROM.h>
 #include "sinux_as540.h"
+#include "mysensors.h"
 
 sinux_as540::sinux_as540(){
 }
@@ -55,25 +56,25 @@ void sinux_as540::INIT(int net_address){
 	}
 }
 
-void sinux_as540::CONFIG_UI(int _ui, int _type){
+void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){
 	digitalWrite(_PTT,HIGH);
 	delay(50);
 	int b = _ui + 4;
 	Serial.print(String(_net_address) + ";"+ b +";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
 	delay(15);
-	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_type_data[_type]+";0\n");
+	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_unit+";0\n");
 	delay(15);
 	digitalWrite(_PTT,LOW);	
 	//jesli zmieniam typ UI na inne niz domyslne
 	switch(_ui){												
-		case 1: _ui_type[1] = _type; break;
-		case 2: _ui_type[2] = _type; break;
-		case 3: _ui_type[3] = _type; break;
-		case 4: _ui_type[4] = _type; break;
-		case 5: _ui_type[5] = _type; break;
+		case 1: _ui_unit[1] = _unit; break;
+		case 2: _ui_unit[2] = _unit; break;
+		case 3: _ui_unit[3] = _unit; break;
+		case 4: _ui_unit[4] = _unit; break;
+		case 5: _ui_unit[5] = _unit; break;
 	}
 }
-
+ 
 void sinux_as540::CONFIG_AV(int _av){
 	digitalWrite(_PTT,HIGH);
 	delay(50);
@@ -284,13 +285,13 @@ void sinux_as540::MAIN(){
 
 	if(millis() >= _time_to_send_UI){
 		for(int a=1; a <= 5; a++){
-			if(_ui_type[a] != 3){										// send only analog inputs
-				int _type = _ui_type[a];
+			if(_ui_unit[a] != 2){										// send only analog inputs
+				int _unit = _ui_unit[a];
 				digitalWrite(_PTT,HIGH);
-				float pomiar = UI_READ(a,_ui_type[a]);
+				float pomiar = UI_READ(a);
 				delay(15);
 				int b = a + 4;
-				Serial.print(String(_net_address) + ";"+ b +";1;1;"+_type_data[_type]+";"+pomiar+"\n");
+				Serial.print(String(_net_address) + ";"+ b +";1;1;"+_unit+";"+pomiar+"\n");
 				delay(15);
 				digitalWrite(_PTT,LOW);
 			}			
@@ -299,11 +300,11 @@ void sinux_as540::MAIN(){
 	}
 }
 
-float sinux_as540::UI_READ(int _ui, int _type){
+float sinux_as540::UI_READ(int _ui){
 	float _pomiar_ui = 0;
 	switch(_ui){
 		case 1:
-			if(_type == 6){	
+			if(_ui_unit[1] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui1)))-238)/10; 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui1);
@@ -311,7 +312,7 @@ float sinux_as540::UI_READ(int _ui, int _type){
 			return(_pomiar_ui);
 		break;
 		case 2:
-			if(_type == 6){	
+			if(_ui_unit[2] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui2)))-238)/10; 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui2);
@@ -319,7 +320,7 @@ float sinux_as540::UI_READ(int _ui, int _type){
 			return(_pomiar_ui);
 		break;
 		case 3:
-			if(_type == 6){	
+			if(_ui_unit[3] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui3)))-238)/10; 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui3);
@@ -327,7 +328,7 @@ float sinux_as540::UI_READ(int _ui, int _type){
 			return(_pomiar_ui);
 		break;
 		case 4:
-			if(_type == 6){	
+			if(_ui_unit[4] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui4)))-238)/10; 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui4);
@@ -335,7 +336,7 @@ float sinux_as540::UI_READ(int _ui, int _type){
 			return(_pomiar_ui);
 		break;
 		case 5:
-			if(_type == 6){	
+			if(_ui_unit[5] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui5)))-238)/10; 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui5);

@@ -13,17 +13,18 @@ boolean on_off_last_flag = false;                // zmienna flaga pomocnicza
 
 void setup() {
   sterownik.INIT(75);                            // inicjalizacja i ustawianie adresu sieciowego
-  sterownik.CONFIG_UI(1,6);                      // CONFIG_UI(input,type) konfiguracja wejscia nr 1 jako UI typ 6-AI(Temp)patrz: http://mysensors.org
-  sterownik.CONFIG_AV(1);                        // punkt załączenia
+  sterownik.CONFIG_UI(1, S_TEMP, V_TEMP);        // CONFIG_UI(input,presentation,set/req) konfiguracja wejscia nr 1 jako UI typ 6-AI(Temp)patrz: http://mysensors.org
+  sterownik.CONFIG_AV(1);                        // punkt załączenia S_HVAC, V_HVAC_SETPOINT_HEAT
   sterownik.CONFIG_AV(2);                        // punkt wyłączenia
 }
 
-void loop() {
-  if(sterownik.UI_READ(1,6) >= sterownik.AV_READ(1)){            // point ON
+void loop() { 
+  
+  if(sterownik.UI_READ(1) >= sterownik.AV_READ(1)){            // point ON
     on_off_flag = true;
   }
   
-  if(sterownik.UI_READ(1,6) <= sterownik.AV_READ(2)){            // point OFF 
+  if(sterownik.UI_READ(1) <= sterownik.AV_READ(2)){            // point OFF 
     on_off_flag = false;
   }
 
