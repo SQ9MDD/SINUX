@@ -10,8 +10,9 @@ class sinux_as540{
 		sinux_as540();
 		void MAIN();
 		void INIT(int net_address);		
-		void CONFIG_UI(int _ui, int _type, int _unit);	//range: 1-5,  child sensors id: 5-9
-		void CONFIG_AV(int _av);						//range: 1-90, child sensors id: 10-100
+		void CONFIG_UI(int _ui, int _type, int _unit);	// range: 1-5,  child sensors id: 5-9
+		void CONFIG_AV(int _av);						// range: 1-10, child sensors id: 11-20
+		void CONFIG_BV(int _bv, boolean _eeprom_write);	// range: 1-10, child sensors id: 21-30
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
@@ -19,6 +20,7 @@ class sinux_as540{
 		boolean BI_PRESSED(int _ui);
 		boolean BI_STATE(int _ui);
 		int AV_READ(int _av);
+		int BV_READ(int _bv);
 		float UI_READ(int _ui);
 		//#include "mysensors.h"
 	private:
@@ -51,6 +53,8 @@ class sinux_as540{
 		int _bo2_countdown = 0;
 		int _bo3_countdown = 0;
 		int _bo4_countdown = 0;
+		boolean _bv_eeprom_write[10] = {false,false,false,false,false,false,false,false,false,false};
+		boolean _bv_state[10] = {false,false,false,false,false,false,false,false,false,false};
 		boolean _bo1_state = false;	
 		boolean _bo2_state = false;	
 		boolean _bo3_state = false;	

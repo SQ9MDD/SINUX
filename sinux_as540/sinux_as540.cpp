@@ -7,6 +7,7 @@ sinux_as540::sinux_as540(){
 }
 
 void sinux_as540::INIT(int net_address){
+	if(net_address <= 9){ _net_address = net_address + 10; }
 	_net_address = net_address;
 	pinMode(_bo1,OUTPUT);				//BO1
 	pinMode(_bo2,OUTPUT);				//BO2
@@ -75,6 +76,23 @@ void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){
 	}
 }
  
+void sinux_as540::CONFIG_BV(int _bv, boolean _eeprom_write){
+	digitalWrite(_PTT,HIGH);
+	delay(50);
+	int b = _bv + 20;
+	Serial.print(String(_net_address) + ";"+ b +";0;0;3;" + String(_net_address) + ".BV"+ _bv +"\n");
+	delay(15);
+	
+	int _bv_value = 0;
+	if(_eeprom_write == true){
+		_bv_value = (EEPROM.read(b)); 
+		_bv_eeprom_write[_bv] = true;	
+	}
+	Serial.print(String(_net_address) + ";"+ b +";1;1;2;"+ _bv_value +"\n");
+	delay(15);
+	digitalWrite(_PTT,LOW);
+}	
+ 
 void sinux_as540::CONFIG_AV(int _av){
 	digitalWrite(_PTT,HIGH);
 	delay(50);
@@ -129,9 +147,10 @@ void sinux_as540::_decode_packet(){
 				} 
 			}
 		}
+		
 		//tutaj dekodowanie AV
 		int sens_addr = content.substring(3,5).toInt();
-		if(content.substring(0,2).toInt() == _net_address && sens_addr >= 10){
+		if(content.substring(0,2).toInt() == _net_address && sens_addr >= 10 && sens_addr <= 20){
 			int ack_option = content.substring(8,9).toInt();
 			int obw_1_dimm_lvl = 0;
 			obw_1_dimm_lvl = content.substring(13).toInt();		
@@ -142,6 +161,23 @@ void sinux_as540::_decode_packet(){
 			Serial.print(String(_net_address) + ";" + String(sens_addr) + ";1;0;45;"+ String(obw_1_dimm_lvl) +"\n");    
 			delay(15);
 			digitalWrite(_PTT,LOW);	
+		}
+		
+		//tutaj dekodowanie BV
+		if(content.substring(0,2).toInt() == _net_address && sens_addr >= 21 && sens_addr <= 30){
+			int ack_option = content.substring(8,9).toInt();
+			int obw_1_dimm_lvl = 0;
+			int bv_number = sens_addr - 20;
+			obw_1_dimm_lvl = content.substring(12,14).toInt();		
+			if(_bv_eeprom_write[bv_number] == true){	
+				EEPROM.write((sens_addr),obw_1_dimm_lvl);
+			}
+			_bv_state[bv_number] = obw_1_dimm_lvl;
+			digitalWrite(_PTT,HIGH);
+			delay(50);
+			Serial.print(String(_net_address) + ";" + String(sens_addr) + ";1;0;2;"+ String(obw_1_dimm_lvl) +"\n");    
+			delay(15);
+			digitalWrite(_PTT,LOW);			
 		}
 	}
 }
@@ -350,6 +386,19 @@ int sinux_as540::AV_READ(int _av){
 	int _sufix = _av + 100;
 	int _av_value = (EEPROM.read(_av)*10) + (EEPROM.read(_sufix));	
 	return(_av_value);
+}
+
+int sinux_as540::BV_READ(int _bv){
+	int _sufix = _bv + 100;
+	int  _bv_value = _bv_state[_bv];
+	if(_bv_eeprom_write[_bv] == true){
+		if(EEPROM.read(_bv + 20) >= 1){
+			_bv_value = 1;
+		}else{
+			_bv_value = 0;
+		}	
+	}
+	return(_bv_value);	
 }
 
 // ************* //
