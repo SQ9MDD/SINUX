@@ -55,14 +55,9 @@ class sinux_as540{
 		int _bo4_countdown = 0;
 		boolean _bv_eeprom_write[10] = {false,false,false,false,false,false,false,false,false,false};
 		boolean _bv_state[10] = {false,false,false,false,false,false,false,false,false,false};
-		boolean _bo1_state = false;	
-		boolean _bo2_state = false;	
-		boolean _bo3_state = false;	
-		boolean _bo4_state = false;	
-		boolean _bo1_prev_state = false;
-		boolean _bo2_prev_state = false;
-		boolean _bo3_prev_state = false;
-		boolean _bo4_prev_state = false;
+		boolean _bo_state[4] = {false,false,false,false};
+		boolean _bo_prev_state[4] = {false,false,false,false}; 
+				
 		boolean _bi1_state = false;
 		boolean _bi2_state = false;
 		boolean _bi3_state = false;

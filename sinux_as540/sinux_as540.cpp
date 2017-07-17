@@ -183,29 +183,27 @@ void sinux_as540::_decode_packet(){
 }
 
 void sinux_as540::MAIN(){
-	if(_net_address >= 1){
-		//reading commands
-		//listening RS485
-		boolean str_ready = false;
-		while(Serial.available()){
-			character = (char)Serial.read();
-			//content.concat(character);
-			content += character;
-			if(character == '\n'){
-				str_ready = true;
-			}
-			delay (10);
+	//reading commands
+	//listening RS485
+	boolean str_ready = false;
+	while(Serial.available()){
+		character = (char)Serial.read();
+		//content.concat(character);
+		content += character;
+		if(character == '\n'){
+			str_ready = true;
 		}
-      
-		//if(content != ""){
-		if(str_ready == true){
-			content.trim();//clearing CR i LF
-			delay(50);
-			_decode_packet();
-			content = "";
-			str_ready = false;
-		}	 
+		delay (10);
 	}
+	//if(content != ""){
+	if(str_ready == true){
+		content.trim();//clearing CR i LF
+		delay(50);
+		_decode_packet();
+		content = "";
+		str_ready = false;
+	}	 
+
 	
 	if(millis() >= _time_to_tick){
 		digitalWrite(_HB,HIGH);
@@ -220,7 +218,7 @@ void sinux_as540::MAIN(){
 		}else{
 			digitalWrite(_bo1,LOW);
 			digitalWrite(_bo1A,LOW);
-			_bo1_state = false;
+			_bo_state[0] = false;
 		}
 		if(_bo2_countdown >= 0){
 			if(_bo2_countdown < 32000){
@@ -229,7 +227,7 @@ void sinux_as540::MAIN(){
 		}else{
 			digitalWrite(_bo2,LOW);
 			digitalWrite(_bo2A,LOW);
-			_bo2_state = false;
+			_bo_state[1] = false;
 		}
 		if(_bo3_countdown >= 0){
 			if(_bo3_countdown < 32000){
@@ -238,7 +236,7 @@ void sinux_as540::MAIN(){
 		}else{
 			digitalWrite(_bo3,LOW);
 			digitalWrite(_bo3A,LOW);
-			_bo3_state = false;
+			_bo_state[2] = false;
 		}
 		if(_bo4_countdown >= 0){
 			if(_bo4_countdown < 32000){
@@ -247,77 +245,32 @@ void sinux_as540::MAIN(){
 		}else{
 			digitalWrite(_bo4,LOW);
 			digitalWrite(_bo4A,LOW);
-			_bo4_state = false;
-		}
-		//testing BO and sending changes to the network
-		if(_net_address >= 1){
-			if(_bo1_state != _bo1_prev_state){
-				if(_bo1_state == true){
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";1;1;1;2;1\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}else{
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";1;1;1;2;0\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}
-			_bo1_prev_state = _bo1_state;
-			}
-			if(_bo2_state != _bo2_prev_state){
-				if(_bo2_state == true){
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";2;1;1;2;1\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}else{
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";2;1;1;2;0\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}
-				_bo2_prev_state = _bo2_state;
-			}
-			if(_bo3_state != _bo3_prev_state){
-				if(_bo3_state == true){
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";3;1;1;2;1\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}else{
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";3;1;1;2;0\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-			}
-			_bo3_prev_state = _bo3_state;
-			}
-			if(_bo4_state != _bo4_prev_state){
-				if(_bo4_state == true){
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";4;1;1;2;1\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}else{
-					digitalWrite(_PTT,HIGH);
-					delay(15);
-					Serial.print(String(_net_address) + ";4;1;1;2;0\n");
-					delay(15);
-					digitalWrite(_PTT,LOW);
-				}
-				_bo4_prev_state = _bo4_state;
-			}			
+			_bo_state[3] = false;
 		}	
 		_time_to_tick = millis() + 100;
 	}
+	
+	//testing BO and sending changes to the network
+	for(int a = 0; a <= 3; a++){
+		int b = a + 1;
+		if(_bo_state[a] != _bo_prev_state[a]){
+			if(_bo_state[a]){
+				digitalWrite(_PTT,HIGH);
+				delay(15);
+				Serial.print(String(_net_address) + ";" + b + ";1;1;2;1\n");
+				delay(15);
+				digitalWrite(_PTT,LOW);				
+			}else{
+				digitalWrite(_PTT,HIGH);
+				delay(15);
+				Serial.print(String(_net_address) + ";" + b + ";1;1;2;0\n");
+				delay(15);
+				digitalWrite(_PTT,LOW);			
+			}
+			
+		}	
+		_bo_prev_state[a] = _bo_state[a];
+	}	
 
 	if(millis() >= _time_to_send_UI){
 		for(int a=1; a <= 5; a++){
@@ -341,7 +294,9 @@ float sinux_as540::UI_READ(int _ui){
 	switch(_ui){
 		case 1:
 			if(_ui_unit[1] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui1)))-238)/10; 
+				_pomiar_ui = ((1023 - float(analogRead(_ui1)))-238)/10;
+			}else if(_ui_unit[1] == 3){
+				_pomiar_ui = map((1023 - analogRead(_ui1)),0,1023,0,100);
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui1);
 			}
@@ -350,6 +305,8 @@ float sinux_as540::UI_READ(int _ui){
 		case 2:
 			if(_ui_unit[2] == 0){	
 				_pomiar_ui = ((1023 - float(analogRead(_ui2)))-238)/10; 
+			}else if(_ui_unit[2] == 3){
+				_pomiar_ui = map((1023 - analogRead(_ui2)),0,1023,0,100);				
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui2);
 			}
@@ -400,10 +357,6 @@ int sinux_as540::BV_READ(int _bv){
 	}
 	return(_bv_value);	
 }
-
-// ************* //
-// GOTOWE poniżej
-// ************* //
 
 boolean sinux_as540::BI_PRESSED(int _ui){
 	switch(_ui){
@@ -503,25 +456,25 @@ void sinux_as540::BO_SET(int pin){
 			_pin_out = _bo1;
 			_led_out = _bo1A;
 			_bo1_countdown = 32000;
-			_bo1_state = true;
+			_bo_state[0] = true;
 		break;
 		case 2:
 			_pin_out = _bo2;
 			_led_out = _bo2A;
 			_bo2_countdown = 32000;
-			_bo2_state = true;
+			_bo_state[1] = true;
 		break;
 		case 3:
 			_pin_out = _bo3;
 			_led_out = _bo3A;
 			_bo3_countdown = 32000;
-			_bo3_state = true;
+			_bo_state[2] = true;
 		break;
 		case 4:
 			_pin_out = _bo4;
 			_led_out = _bo4A;
 			_bo4_countdown = 32000;
-			_bo4_state = true;
+			_bo_state[3] = true;
 		break;
 	}
 	//sterowanie wyjsciem
@@ -537,25 +490,25 @@ void sinux_as540::BO_RESET(int pin){
 			_pin_out = _bo1;
 			_led_out = _bo1A;
 			_bo1_countdown = 32000;
-			_bo1_state = false;
+			_bo_state[0] = false;
 		break;
 		case 2:
 			_pin_out = _bo2;
 			_led_out = _bo2A;
 			_bo2_countdown = 32000;
-			_bo2_state = false;
+			_bo_state[1] = false;
 		break;
 		case 3:
 			_pin_out = _bo3;
 			_led_out = _bo3A;
 			_bo3_countdown = 32000;
-			_bo3_state = false;
+			_bo_state[2] = false;
 		break;
 		case 4:
 			_pin_out = _bo4;
 			_led_out = _bo4A;
 			_bo4_countdown = 32000;
-			_bo4_state = false;
+			_bo_state[3] = false;
 		break;
 	}
 	//sterowanie wyjsciem
@@ -572,11 +525,11 @@ void sinux_as540::BO_TOGGLE(int pin){
 			_pin_out = _bo1;
 			_led_out = _bo1A;
 			_bo1_countdown = 32000;
-			if(_bo1_state == true){
-				_bo1_state = false;
+			if(_bo_state[0] == true){
+				_bo_state[0] = false;
 				_command = false;
 			}else{
-				_bo1_state = true;
+				_bo_state[0] = true;
 				_command = true;
 			}
 		break;
@@ -584,11 +537,11 @@ void sinux_as540::BO_TOGGLE(int pin){
 			_pin_out = _bo2;
 			_led_out = _bo2A;
 			_bo2_countdown = 32000;
-			if(_bo2_state == true){
-				_bo2_state = false;
+			if(_bo_state[1] == true){
+				_bo_state[1] = false;
 				_command = false;
 			}else{
-				_bo2_state = true;
+				_bo_state[1] = true;
 				_command = true;
 			}
 		break;
@@ -596,11 +549,11 @@ void sinux_as540::BO_TOGGLE(int pin){
 			_pin_out = _bo3;
 			_led_out = _bo3A;
 			_bo3_countdown = 32000;
-			if(_bo3_state == true){
-				_bo3_state = false;
+			if(_bo_state[2] == true){
+				_bo_state[2] = false;
 				_command = false;
 			}else{
-				_bo3_state = true;
+				_bo_state[2] = true;
 				_command = true;
 			}
 		break;
@@ -608,22 +561,22 @@ void sinux_as540::BO_TOGGLE(int pin){
 			_pin_out = _bo4;
 			_led_out = _bo4A;
 			_bo4_countdown = 32000;
-			if(_bo4_state == true){
-				_bo4_state = false;
+			if(_bo_state[3] == true){
+				_bo_state[3] = false;
 				_command = false;
 			}else{
-				_bo4_state = true;
+				_bo_state[3] = true;
 				_command = true;
 			}
 		break;
 	}
 	//sterowanie wyjsciem
 	if(_command == true){
-	digitalWrite(_pin_out,HIGH);
-	digitalWrite(_led_out,HIGH);		
+		digitalWrite(_pin_out,HIGH);
+		digitalWrite(_led_out,HIGH);		
 	}else{
-	digitalWrite(_pin_out,LOW);
-	digitalWrite(_led_out,LOW);		
+		digitalWrite(_pin_out,LOW);
+		digitalWrite(_led_out,LOW);		
 	}
 }
 
@@ -637,25 +590,25 @@ void sinux_as540::BO_SET_TIME(int pin, int time){
 			_pin_out = _bo1;
 			_led_out = _bo1A;
 			_bo1_countdown = time;
-			_bo1_state = true;
+			_bo_state[0] = true;
 		break;
 		case 2:
 			_pin_out = _bo2;
 			_led_out = _bo2A;
 			_bo2_countdown = time;
-			_bo2_state = true;
+			_bo_state[1] = true;
 		break;
 		case 3:
 			_pin_out = _bo3;
 			_led_out = _bo3A;
 			_bo3_countdown = time;
-			_bo3_state = true;
+			_bo_state[2] = true;
 		break;
 		case 4:
 			_pin_out = _bo4;
 			_led_out = _bo4A;
 			_bo4_countdown = time;
-			_bo4_state = true;
+			_bo_state[3] = true;
 		break;
 	}
 	//sterowanie wyjsciem
