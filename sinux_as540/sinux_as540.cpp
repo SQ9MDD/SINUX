@@ -27,9 +27,11 @@ void sinux_as540::INIT(int net_address){
 	delay(100);
 	_time_to_tick = millis() + 1000;
 	digitalWrite(_HB,HIGH);
+	unsigned long startup_delay = (net_address * 1000) - 10000;
+	delay(startup_delay);
 	Serial.begin(115200);
 		
-	if(net_address >= 1){
+	//if(net_address >= 1){
 		//if address bigger than 0 then sent presentation 4 BO and initial state
 		digitalWrite(_PTT,HIGH);
 		delay(50);
@@ -54,7 +56,7 @@ void sinux_as540::INIT(int net_address){
 		Serial.print(String(net_address) + ";4;1;1;2;0\n");			
 		delay(100);
 		digitalWrite(_PTT,LOW);
-	}
+	//}
 }
 
 void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){

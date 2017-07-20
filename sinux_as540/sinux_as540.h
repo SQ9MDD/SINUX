@@ -9,10 +9,10 @@ class sinux_as540{
 		//functions
 		sinux_as540();
 		void MAIN();
-		void INIT(int net_address);		
-		void CONFIG_UI(int _ui, int _type, int _unit);	// range: 1-5,  child sensors id: 5-9
-		void CONFIG_AV(int _av);						// range: 1-10, child sensors id: 11-20
-		void CONFIG_BV(int _bv, boolean _eeprom_write);	// range: 1-10, child sensors id: 21-30
+		void INIT(int net_address);						// BO range: 2-4,  child sensors id: 1-4
+		void CONFIG_UI(int _ui, int _type, int _unit);	// UI range: 1-5,  child sensors id: 5-9
+		void CONFIG_AV(int _av);						// AV range: 1-10, child sensors id: 11-20
+		void CONFIG_BV(int _bv, boolean _eeprom_write);	// BV range: 1-10, child sensors id: 21-30
 		void BO_SET(int pin);
 		void BO_RESET(int pin);
 		void BO_TOGGLE(int pin);
@@ -22,7 +22,6 @@ class sinux_as540{
 		int AV_READ(int _av);
 		int BV_READ(int _bv);
 		float UI_READ(int _ui);
-		//#include "mysensors.h"
 	private:
 		//functons
 		void _decode_packet();
