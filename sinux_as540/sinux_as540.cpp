@@ -29,7 +29,7 @@ void sinux_as540::INIT(int net_address){
 	pinMode(_ui4, INPUT);				//UI4
 	pinMode(_ui5, INPUT);				//UI5
 	delay(100);
-	//_prev_millis = millis();
+	_prev_millis = millis();
 	digitalWrite(_HB,HIGH);
 	unsigned long startup_delay = (net_address * 1000) - 10000;
 	delay(startup_delay);
@@ -274,7 +274,7 @@ void sinux_as540::MAIN(){
 		_bo_prev_state[a] = _bo_state[a];
 	}	
 
-	if((millis() - _time_to_send_UI) >= 240000){
+	if((millis() - _time_to_send_UI) >= 240000){	//240000 = 4min
 		_time_to_send_UI = millis();
 		for(int a=1; a <= 5; a++){
 			if(_ui_unit[a] != 2){										// send only analog inputs
