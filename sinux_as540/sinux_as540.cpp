@@ -6,6 +6,10 @@
 sinux_as540::sinux_as540(){
 }
 
+void sinux_as540::INIT(){
+	INIT(10);
+}
+
 void sinux_as540::INIT(int net_address){
 	if(net_address <= 9){ _net_address = net_address + 10; }
 	_net_address = net_address;
@@ -25,14 +29,11 @@ void sinux_as540::INIT(int net_address){
 	pinMode(_ui4, INPUT);				//UI4
 	pinMode(_ui5, INPUT);				//UI5
 	delay(100);
-	_time_to_tick = millis() + 1000;
+	//_prev_millis = millis();
 	digitalWrite(_HB,HIGH);
 	unsigned long startup_delay = (net_address * 1000) - 10000;
 	delay(startup_delay);
 	Serial.begin(115200);
-		
-	//if(net_address >= 1){
-		//if address bigger than 0 then sent presentation 4 BO and initial state
 		digitalWrite(_PTT,HIGH);
 		delay(50);
 		Serial.print(String(net_address) + ";0;3;0;11;AS-540\n");	//nazwa softu
@@ -56,7 +57,6 @@ void sinux_as540::INIT(int net_address){
 		Serial.print(String(net_address) + ";4;1;1;2;0\n");			
 		delay(100);
 		digitalWrite(_PTT,LOW);
-	//}
 }
 
 void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){
@@ -207,7 +207,8 @@ void sinux_as540::MAIN(){
 	}	 
 
 	
-	if(millis() >= _time_to_tick){
+	if((millis() - _prev_millis) >= 100){
+		_prev_millis = millis();
 		digitalWrite(_HB,HIGH);
 		delay(3);
 		digitalWrite(_HB,LOW);
@@ -249,7 +250,6 @@ void sinux_as540::MAIN(){
 			digitalWrite(_bo4A,LOW);
 			_bo_state[3] = false;
 		}	
-		_time_to_tick = millis() + 100;
 	}
 	
 	//testing BO and sending changes to the network
@@ -274,7 +274,8 @@ void sinux_as540::MAIN(){
 		_bo_prev_state[a] = _bo_state[a];
 	}	
 
-	if(millis() >= _time_to_send_UI){
+	if((millis() - _time_to_send_UI) >= 240000){
+		_time_to_send_UI = millis();
 		for(int a=1; a <= 5; a++){
 			if(_ui_unit[a] != 2){										// send only analog inputs
 				int _unit = _ui_unit[a];
@@ -287,7 +288,6 @@ void sinux_as540::MAIN(){
 				digitalWrite(_PTT,LOW);
 			}			
 		}
-	_time_to_send_UI = millis() + 240000;
 	}
 }
 
