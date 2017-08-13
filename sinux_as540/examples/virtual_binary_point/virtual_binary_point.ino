@@ -9,7 +9,7 @@
 sinux_as540 sterownik;
 
 void setup() {
-  sterownik.INIT(75);                            // inicjalizacja i ustawianie adresu sieciowego
+  sterownik.INIT(11);                            // inicjalizacja i ustawianie adresu sieciowego
   sterownik.CONFIG_BV(1,false);                  // konfiguracja zmiennej BV1 bez zapisu do eeprom     
   sterownik.CONFIG_BV(2,true);                   // konfiguracja zmiennej BV2 z zapisem do eeprom stan zachowywany pomimo restartów  
 }

@@ -26,10 +26,11 @@ class sinux_as540{
 	private:
 		//functons
 		void _decode_packet();
+		void _send_reply(int _sens_addr, int _sens_state);
 		//variables
 		char character;
 		String content = "";
-		#define _lib_version 1.2
+		#define _lib_version 1.21
 		#define _bo1  8
 		#define _bo2  7
 		#define _bo3  5

@@ -31,7 +31,7 @@ void sinux_as540::INIT(int net_address){
 	delay(100);
 	_prev_millis = millis();
 	digitalWrite(_HB,HIGH);
-	unsigned long startup_delay = (net_address * 1000) - 10000;
+	unsigned long startup_delay = long(net_address) * 1000;
 	delay(startup_delay);
 	Serial.begin(115200);
 		digitalWrite(_PTT,HIGH);
@@ -108,42 +108,76 @@ void sinux_as540::CONFIG_AV(int _av){
 	digitalWrite(_PTT,LOW);		
 }
 
+void sinux_as540::_send_reply(int _sens_addr, int _sens_state){
+	digitalWrite(_PTT,HIGH);
+	delay(15);
+	Serial.print(String(_net_address) + ";" + _sens_addr + ";1;1;2;" + _sens_state + "\n");
+	delay(15);
+	digitalWrite(_PTT,LOW);	
+}
+
 void sinux_as540::_decode_packet(){
   //olewamy dekodowanie jesli dane nie sa dla mnie
 	if(content.substring(0,2).toInt() != _net_address){
 		return;
-	}else{
+	}else{	
 		for(int licznik = 1; licznik <= 4; licznik++){
 			if(content == (String(_net_address) + ";" + String(licznik) + ";1;1;2;1")){
 				switch(licznik){
 				case 1:
+					if(_bo_state[0] == true){
+						_send_reply(1,1);
+					}				
 					BO_SET(1);
 				break;
 				case 2:
+					if(_bo_state[1] == true){
+						_send_reply(2,1);
+					}				
 					BO_SET(2);
 				break; 
 				case 3:
+					if(_bo_state[2] == true){
+						_send_reply(3,1);
+					}				
 					BO_SET(3);
 				break; 
 				case 4:
+					if(_bo_state[3] == true){
+						_send_reply(4,1);
+					}				
 					BO_SET(4);
 				break;          
 				} 
 			}
 		} 
+
 		for(int licznik = 1; licznik <= 4; licznik++){
 			if((content == (String(_net_address) + ";" + String(licznik) + ";1;1;2;0"))){
 				switch(licznik){
 				case 1:
+					if(_bo_state[0] == false){
+						_send_reply(1,0);
+					}					
 					BO_RESET(1);
 				break;
 				case 2:
+					if(_bo_state[1] == false){
+						_send_reply(2,0);
+					}					
 					BO_RESET(2);
 				break; 
 				case 3:
+					if(_bo_state[2] == false){
+						_send_reply(3,0);
+					}				
+					BO_SET(3);				
 					BO_RESET(3);
 				break; 
 				case 4:
+					if(_bo_state[3] == false){
+						_send_reply(4,0);
+					}					
 					BO_RESET(4);
 				break;          
 				} 

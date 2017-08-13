@@ -9,10 +9,10 @@
 sinux_as540 sterownik;
 
 void setup() {
-  sterownik.INIT(75);                                               // inicjalizacja i ustawianie adresu sieciowego
+  sterownik.INIT(11);                                               // inicjalizacja i ustawianie adresu sieciowego
   sterownik.CONFIG_AV(1);                                           // zmienne AV1 do przetrzymywania czasu świecenia w sekundach
   sterownik.CONFIG_AV(2);                                           // zmienna AV2 do przechowywania poziomu natezenia oswietlenia ponizej ktorego ma dzialac obwod
-  sterownik.CONFIG_UI(5,S_LIGHT_LEVEL, V_LEVEL);                    // czujnik  natezenia oswietlenia
+  sterownik.CONFIG_UI(5,S_LIGHT_LEVEL, V_LEVEL);                    // wejście UI5 czujnik natezenia oswietlenia
 }
 
 void loop() {
