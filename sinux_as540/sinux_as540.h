@@ -3,6 +3,7 @@
 
 #include "mysensors.h"
 #include "Arduino.h"
+#include "math.h"
 
 class sinux_as540{
 	public: 
@@ -30,7 +31,7 @@ class sinux_as540{
 		//variables
 		char character;
 		String content = "";
-		#define _lib_version 1.21
+		#define _lib_version 1.22
 		#define _bo1  8
 		#define _bo2  7
 		#define _bo3  5

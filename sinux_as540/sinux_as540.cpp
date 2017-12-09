@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include <math.h>
 #include <EEPROM.h>
 #include "sinux_as540.h"
 #include "mysensors.h"
@@ -60,14 +61,6 @@ void sinux_as540::INIT(int net_address){
 }
 
 void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){
-	digitalWrite(_PTT,HIGH);
-	delay(50);
-	int b = _ui + 4;
-	Serial.print(String(_net_address) + ";"+ b +";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
-	delay(15);
-	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_unit+";0\n");
-	delay(15);
-	digitalWrite(_PTT,LOW);	
 	//jesli zmieniam typ UI na inne niz domyslne
 	switch(_ui){												
 		case 1: _ui_unit[1] = _unit; break;
@@ -75,7 +68,16 @@ void sinux_as540::CONFIG_UI(int _ui, int _type, int _unit){
 		case 3: _ui_unit[3] = _unit; break;
 		case 4: _ui_unit[4] = _unit; break;
 		case 5: _ui_unit[5] = _unit; break;
-	}
+	}	
+	digitalWrite(_PTT,HIGH);
+	delay(50);
+	int b = _ui + 4;
+	Serial.print(String(_net_address) + ";"+ b +";0;0;"+_type+";" + String(_net_address) + ".UI"+_ui+"\n");
+	delay(15);
+	//float _ini_read = UI_READ(_ui);
+	Serial.print(String(_net_address) + ";"+ b +";1;1;"+_unit+";" + String(UI_READ(_ui)) + "\n"); //fix for zero reading after reboot
+	delay(15);
+	digitalWrite(_PTT,LOW);	
 }
  
 void sinux_as540::CONFIG_BV(int _bv, boolean _eeprom_write){
@@ -326,11 +328,23 @@ void sinux_as540::MAIN(){
 }
 
 float sinux_as540::UI_READ(int _ui){
+	//
+
+	//
 	float _pomiar_ui = 0;
 	switch(_ui){
 		case 1:
-			if(_ui_unit[1] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui1)))-238)/10;
+			if(_ui_unit[1] == 0){
+				// pomiar temp charakterystyka NTC10 krzywa cztero punktowa				
+				_pomiar_ui = analogRead(_ui1);
+				if(_pomiar_ui > 734){
+					_pomiar_ui = float(map(_pomiar_ui,734,927,50,-200))/10;
+				}else if(_pomiar_ui <= 734 && _pomiar_ui >= 468){
+					_pomiar_ui = float(map(_pomiar_ui,468,734,290,50))/10;
+				}else if(_pomiar_ui < 468){
+					_pomiar_ui = float(map(_pomiar_ui,65,468,350,290))/10;
+				}	
+				//koniec pomiaru temp
 			}else if(_ui_unit[1] == 3){
 				_pomiar_ui = map((1023 - analogRead(_ui1)),0,1023,0,100);
 			}else{
@@ -340,7 +354,16 @@ float sinux_as540::UI_READ(int _ui){
 		break;
 		case 2:
 			if(_ui_unit[2] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui2)))-238)/10; 
+				// pomiar temp charakterystyka NTC10 krzywa cztero punktowa				
+				_pomiar_ui = analogRead(_ui2);
+				if(_pomiar_ui > 734){
+					_pomiar_ui = float(map(_pomiar_ui,734,927,50,-200))/10;
+				}else if(_pomiar_ui <= 734 && _pomiar_ui >= 468){
+					_pomiar_ui = float(map(_pomiar_ui,468,734,290,50))/10;
+				}else if(_pomiar_ui < 468){
+					_pomiar_ui = float(map(_pomiar_ui,65,468,350,290))/10;
+				}	
+				//koniec pomiaru temp
 			}else if(_ui_unit[2] == 3){
 				_pomiar_ui = map((1023 - analogRead(_ui2)),0,1023,0,100);				
 			}else{
@@ -350,7 +373,16 @@ float sinux_as540::UI_READ(int _ui){
 		break;
 		case 3:
 			if(_ui_unit[3] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui3)))-238)/10; 
+				// pomiar temp charakterystyka NTC10 krzywa cztero punktowa				
+				_pomiar_ui = analogRead(_ui3);
+				if(_pomiar_ui > 734){
+					_pomiar_ui = float(map(_pomiar_ui,734,927,50,-200))/10;
+				}else if(_pomiar_ui <= 734 && _pomiar_ui >= 468){
+					_pomiar_ui = float(map(_pomiar_ui,468,734,290,50))/10;
+				}else if(_pomiar_ui < 468){
+					_pomiar_ui = float(map(_pomiar_ui,65,468,350,290))/10;
+				}	
+				//koniec pomiaru temp
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui3);
 			}
@@ -358,7 +390,16 @@ float sinux_as540::UI_READ(int _ui){
 		break;
 		case 4:
 			if(_ui_unit[4] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui4)))-238)/10; 
+				// pomiar temp charakterystyka NTC10 krzywa cztero punktowa				
+				_pomiar_ui = analogRead(_ui4);
+				if(_pomiar_ui > 734){
+					_pomiar_ui = float(map(_pomiar_ui,734,927,50,-200))/10;
+				}else if(_pomiar_ui <= 734 && _pomiar_ui >= 468){
+					_pomiar_ui = float(map(_pomiar_ui,468,734,290,50))/10;
+				}else if(_pomiar_ui < 468){
+					_pomiar_ui = float(map(_pomiar_ui,65,468,350,290))/10;
+				}	
+				//koniec pomiaru temp  
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui4);
 			}
@@ -366,7 +407,16 @@ float sinux_as540::UI_READ(int _ui){
 		break;
 		case 5:
 			if(_ui_unit[5] == 0){	
-				_pomiar_ui = ((1023 - float(analogRead(_ui5)))-238)/10; 
+				// pomiar temp charakterystyka NTC10 krzywa cztero punktowa				
+				_pomiar_ui = analogRead(_ui5);
+				if(_pomiar_ui > 734){
+					_pomiar_ui = float(map(_pomiar_ui,734,927,50,-200))/10;
+				}else if(_pomiar_ui <= 734 && _pomiar_ui >= 468){
+					_pomiar_ui = float(map(_pomiar_ui,468,734,290,50))/10;
+				}else if(_pomiar_ui < 468){
+					_pomiar_ui = float(map(_pomiar_ui,65,468,350,290))/10;
+				}	
+				//koniec pomiaru temp 
 			}else{
 				_pomiar_ui = 1023 - analogRead(_ui5);
 			}
